@@ -15,17 +15,22 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 public class MainActivity extends AppCompatActivity {
     //variables
     private Button btCrash;
     private static final int REQUEST_CODE_PERMISSION = 1;
+    private static final String TAG ="MEDIA" ;
     AlertDialog.Builder alert1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,8 +74,7 @@ public class MainActivity extends AppCompatActivity {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
             //get the path to Folder on SD
-            String PathName=Environment.getExternalStorageDirectory().toString() +
-                    File.separator + name;
+            String PathName=System.getenv("SECONDARY_STORAGE")+File.separator+name;
             File dir = new File(PathName);
             if(dir.exists() && dir.isDirectory()) {
                 ReadAndWrite(PathName);
@@ -85,16 +89,24 @@ public class MainActivity extends AppCompatActivity {
         File[] filesArray=rootFolder.listFiles();
         for(File f:filesArray){
             if (f.isDirectory()){
-
+                //nothings
             }else{
                 String filepath=f.getPath();
                 if (filepath.endsWith(".txt")) {
-                    PrintWriter writer = null;
+//                    f.delete();       //delete file
                     try {
-                        writer = new PrintWriter(f);
-                        writer.print("XAXA misha");
-                        writer.close();
+                        FileOutputStream fOutput = new FileOutputStream(filepath);
+                        PrintWriter pw = new PrintWriter(fOutput);
+                        pw.println("Hi , How are you");
+                        pw.println("Hello");
+                        pw.flush();
+                        pw.close();
+                        fOutput.close();
                     } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                        Log.i(TAG, "******* File not found. Did you" +
+                                " add a WRITE_EXTERNAL_STORAGE permission to the   manifest?");
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
